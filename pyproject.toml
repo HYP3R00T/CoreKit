@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "UtilityHub"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 authors = ["hyp3r00t <rajesh@hyperoot.dev>"]
 readme = "README.md"
