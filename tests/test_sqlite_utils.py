@@ -4,7 +4,7 @@ from typing import Generator
 
 import pytest
 
-from corekit import sqlite_utils
+from utilityhub import sqlite_utils
 
 
 @pytest.fixture
