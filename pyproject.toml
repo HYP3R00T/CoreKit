@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "corekit"
+name = "UtilityHub"
 version = "0.1.0"
 description = ""
 authors = ["hyp3r00t <rajesh@hyperoot.dev>"]
