@@ -30,6 +30,8 @@ def execute_query(conn: sqlite3.Connection, query: str, params: tuple | None = (
 
 # Generic function to execute a script (multiple queries)
 def execute_script(conn: sqlite3.Connection, script: str) -> None:
+    if len(script) == 0:
+        raise ValueError("Query cannot be empty.")
     try:
         cursor = conn.cursor()
         cursor.executescript(script)
@@ -41,6 +43,8 @@ def execute_script(conn: sqlite3.Connection, script: str) -> None:
 
 # Generic function to fetch data
 def fetch_data(conn: sqlite3.Connection, query: str, params: tuple | None = ()) -> list[tuple]:
+    if len(query) == 0:
+        raise ValueError("Query cannot be empty.")
     try:
         cursor = conn.cursor()
         cursor.execute(query, params)

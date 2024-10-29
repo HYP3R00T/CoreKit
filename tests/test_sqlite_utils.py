@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 from typing import Generator
 
-import pytest
+import pytest  # type: ignore
 
 from utilityhub import sqlite_utils
 
@@ -102,6 +102,84 @@ class TestExecuteQuery:
             cursor.execute("SELECT name FROM test WHERE id = 1")
             result = cursor.fetchone()
             assert result == ("test_name",)
+        finally:
+            conn.close()
+
+    def test_invalid_sql_query(self, temp_db_path):
+        """Test executing an invalid SQL query raises sqlite3.Error."""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            with pytest.raises(sqlite3.Error):
+                sqlite_utils.execute_query(conn, "INVALID SQL QUERY")
+        finally:
+            conn.close()
+
+
+class TestExecuteScript:
+    def test_empty_script(self, temp_db_path):
+        """Test emmpty script"""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            with pytest.raises(ValueError):
+                sqlite_utils.execute_script(conn, "")
+        finally:
+            conn.close()
+
+    def test_execute_valid_script(self, temp_db_path):
+        """Test executing a valid script."""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            create_table_script = """
+            CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE test2 (id INTEGER PRIMARY KEY, name TEXT);"""
+            sqlite_utils.execute_script(conn, create_table_script)
+
+            insert_script = """
+            INSERT INTO test (name) VALUES ("test_name");
+            INSERT INTO test2 (name) VALUES ("test_name")"""
+            sqlite_utils.execute_script(conn, insert_script)
+
+            cursor = conn.cursor()
+            cursor.execute("SELECT test.name, test2.name FROM test join test2 WHERE test.id = test2.id;")
+            result = cursor.fetchone()
+            assert result == ("test_name", "test_name")
+        finally:
+            conn.close()
+
+    def test_invalid_sql_script(self, temp_db_path):
+        """Test executing an invalid SQL script raises sqlite3.Error."""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            with pytest.raises(sqlite3.Error):
+                sqlite_utils.execute_script(conn, "INVALID SQL SCRIPT")
+        finally:
+            conn.close()
+
+
+class TestFetchData:
+    def test_empty_query(self, temp_db_path):
+        """Test empty query"""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            with pytest.raises(ValueError):
+                sqlite_utils.fetch_data(conn, "")
+        finally:
+            conn.close()
+
+    def test_execute_valid_query(self, temp_db_path):
+        """Test executing a valid query."""
+        conn = sqlite_utils.connect_to_db(temp_db_path)
+        try:
+            create_table_query = "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)"
+            sqlite_utils.execute_query(conn, create_table_query)
+
+            insert_query = "INSERT INTO test (name) VALUES (?)"
+            sqlite_utils.execute_query(conn, insert_query, ("test_name",))
+
+            select_query = "SELECT name FROM test WHERE id = 1"
+            result = sqlite_utils.fetch_data(conn, select_query)
+
+            assert result == [("test_name",)]
         finally:
             conn.close()
 
